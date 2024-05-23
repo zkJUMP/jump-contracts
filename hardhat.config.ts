@@ -112,95 +112,95 @@ const config: HardhatUserConfig = {
       url: 'https://sepolia.era.zksync.dev',
       ethNetwork: 'sepolia',
       zksync: true,
-      verifyURL: "https://explorer.sepolia.era.zksync.dev/contract_verification"
+      verifyURL: 'https://explorer.sepolia.era.zksync.dev/contract_verification',
     },
     zksync: {
       url: 'https://mainnet.era.zksync.io',
       ethNetwork: 'mainnet',
       zksync: true,
-      verifyURL: "https://zksync2-mainnet-explorer.zksync.io/contract_verification"
+      verifyURL: 'https://zksync2-mainnet-explorer.zksync.io/contract_verification',
     },
   },
   etherscan: {
     apiKey: {
-      arbitrumSepolia: process.env.ARBISCAN_API_KEY ?? "",
-      arbitrumOne: process.env.ARBISCAN_API_KEY ?? "",
-      baseSepolia: process.env.BASESCAN_API_KEY ?? "",
-      base: process.env.BASESCAN_API_KEY ?? "",
-      lineaSepolia: process.env.LINEASCAN_API_KEY ?? "",
-      linea: process.env.LINEASCAN_API_KEY ?? "",
-      mantleSepolia: process.env.ETHERSCAN_API_KEY ?? "",
-      mantle: process.env.ETHERSCAN_API_KEY ?? "",
-      mantaSepolia: process.env.OPTIMISMSCAN_API_KEY ?? "",
-      manta: process.env.OPTIMISMSCAN_API_KEY ?? "",
-      optimismSepolia: process.env.OPTIMISMSCAN_API_KEY ?? "",
-      optimism: process.env.OPTIMISMSCAN_API_KEY ?? "",
-      sepolia: process.env.ETHERSCAN_API_KEY ?? "",
-      mainnet: process.env.ETHERSCAN_API_KEY ?? "",
+      arbitrumSepolia: process.env.ARBISCAN_API_KEY ?? '',
+      arbitrumOne: process.env.ARBISCAN_API_KEY ?? '',
+      baseSepolia: process.env.BASESCAN_API_KEY ?? '',
+      base: process.env.BASESCAN_API_KEY ?? '',
+      lineaSepolia: process.env.LINEASCAN_API_KEY ?? '',
+      linea: process.env.LINEASCAN_API_KEY ?? '',
+      mantleSepolia: process.env.ETHERSCAN_API_KEY ?? '',
+      mantle: process.env.ETHERSCAN_API_KEY ?? '',
+      mantaSepolia: process.env.OPTIMISMSCAN_API_KEY ?? '',
+      manta: process.env.OPTIMISMSCAN_API_KEY ?? '',
+      optimismSepolia: process.env.OPTIMISMSCAN_API_KEY ?? '',
+      optimism: process.env.OPTIMISMSCAN_API_KEY ?? '',
+      sepolia: process.env.ETHERSCAN_API_KEY ?? '',
+      mainnet: process.env.ETHERSCAN_API_KEY ?? '',
     },
     customChains: [
       {
         network: 'lineaSepolia',
         chainId: 59141,
         urls: {
-          apiURL: "https://api-sepolia.lineascan.build/api",
-          browserURL: "https://sepolia.lineascan.build/"
+          apiURL: 'https://api-sepolia.lineascan.build/api',
+          browserURL: 'https://sepolia.lineascan.build/',
         },
       },
       {
-        network: "linea",
+        network: 'linea',
         chainId: 59144,
         urls: {
-          apiURL: "https://api.lineascan.build/api",
-          browserURL: "https://lineascan.build/"
-        }
+          apiURL: 'https://api.lineascan.build/api',
+          browserURL: 'https://lineascan.build/',
+        },
       },
       {
         network: 'mantleSepolia',
         chainId: 5003,
         urls: {
-          apiURL: "https://explorer.sepolia.mantle.xyz/api",
-          browserURL: "https://explorer.sepolia.mantle.xyz"
+          apiURL: 'https://explorer.sepolia.mantle.xyz/api',
+          browserURL: 'https://explorer.sepolia.mantle.xyz',
         },
       },
       {
         network: 'mantle',
         chainId: 5000,
         urls: {
-          apiURL: "https://explorer.mantle.xyz/api",
-          browserURL: "https://explorer.mantle.xyz"
+          apiURL: 'https://explorer.mantle.xyz/api',
+          browserURL: 'https://explorer.mantle.xyz',
         },
       },
       {
         network: 'mantaSepolia',
         chainId: 3441006,
         urls: {
-          apiURL: "https://pacific-explorer.sepolia-testnet.manta.network/api",
-          browserURL: "https://pacific-explorer.sepolia-testnet.manta.network"
+          apiURL: 'https://pacific-explorer.sepolia-testnet.manta.network/api',
+          browserURL: 'https://pacific-explorer.sepolia-testnet.manta.network',
         },
       },
       {
         network: 'manta',
         chainId: 169,
         urls: {
-          apiURL: "https://pacific-explorer.manta.network/api",
-          browserURL: "https://pacific-explorer.manta.network/"
+          apiURL: 'https://pacific-explorer.manta.network/api',
+          browserURL: 'https://pacific-explorer.manta.network/',
         },
       },
       {
         network: 'optimismSepolia',
         chainId: 11155420,
         urls: {
-          apiURL: "https://api-sepolia-optimistic.etherscan.io/api",
-          browserURL: "https://sepolia-optimistic.etherscan.io"
+          apiURL: 'https://api-sepolia-optimistic.etherscan.io/api',
+          browserURL: 'https://sepolia-optimistic.etherscan.io',
         },
       },
       {
         network: 'optimism',
         chainId: 10,
         urls: {
-          apiURL: "https://api-optimistic.etherscan.io/api",
-          browserURL: "https://explorer.optimism.io"
+          apiURL: 'https://api-optimistic.etherscan.io/api',
+          browserURL: 'https://explorer.optimism.io',
         },
       },
     ],

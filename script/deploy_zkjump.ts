@@ -10,7 +10,7 @@ import {
   DEPLOY_LOG_ZKJUMP_TARGET,
   DEPLOY_LOG_ZKJUMP_TARGET_VERIFIED,
   DEPLOY_LOG_ZKJUMP_PROXY_VERIFIED,
-  DEPLOY_LOG_ZKJUMP_WITNESS
+  DEPLOY_LOG_ZKJUMP_WITNESS,
 } from './deploy_log_name';
 import { task, types } from 'hardhat/config';
 
