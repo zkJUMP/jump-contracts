@@ -1,0 +1,24 @@
+.idea
+.DS_Store
+node_modules
+
+log
+tmp
+
+.env
+abi
+# Hardhat files
+cache-zk
+artifacts-zk
+deployments-zk
+cache
+artifacts
+deployments
+
+# TypeChain files
+/typechain
+/typechain-types
+
+# Openzeppelin upgrade
+.openzeppelin
+.upgradable
