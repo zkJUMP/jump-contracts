@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { ethers } from 'hardhat';
-import { Wallet, parseEther, encodeBytes32String } from 'ethers';
+import { Signer, parseEther, encodeBytes32String } from 'ethers';
 import { ZkJump, ZkLinkToken } from '../typechain';
 import { upgrades } from 'hardhat';
 
@@ -13,7 +13,7 @@ async function getBridgeSignature(
   dstChainId: number,
   amount: bigint,
   nonce: number,
-  signer: Wallet,
+  signer: Signer,
 ) {
   const domain = {
     name: 'ZKJUMP',
@@ -62,7 +62,7 @@ async function getReleaseSignature(
   amount: bigint,
   nonce: number,
   txHash: string,
-  signer: Wallet,
+  signer: Signer,
 ) {
   const domain = {
     name: 'ZKJUMP',
@@ -112,27 +112,37 @@ describe('ZkJump', function () {
   let zkJumpAddr: string;
   let mockTokenAddr: string;
 
-  let owner: Wallet;
-  let witness: Wallet;
-  let executor: Wallet;
-  let emergencier: Wallet;
-  let user1: Wallet;
-  let user2: Wallet;
-  let user3: Wallet;
-  let user4: Wallet;
+  let owner: Signer;
+  let ownerAddr: string;
+  let witness: Signer;
+  let witnessAddr: string;
+  let executor: Signer;
+  let executorAddr: string;
+  let emergencier: Signer;
+  let emergencierAddr: string;
+  let user1: Signer;
+  let user1Addr: string;
+  let user2: Signer;
+  let user2Addr: string;
+  let user3: Signer;
+  let user3Addr: string;
+  let user4: Signer;
+  let user4Addr: string;
 
   before(async function () {
     [owner, witness, executor, emergencier, user1, user2, user3, user4] = await ethers.getSigners();
-    console.log('owner:', owner.address);
-    console.log('witness:', witness.address);
-    console.log('executor:', executor.address);
-    console.log('emergencier:', emergencier.address);
-    console.log('user1:', user1.address);
-    console.log('user2:', user2.address);
+    ownerAddr = await owner.getAddress();
+    witnessAddr = await witness.getAddress();
+    executorAddr = await executor.getAddress();
+    emergencierAddr = await emergencier.getAddress();
+    user1Addr = await user1.getAddress();
+    user2Addr = await user2.getAddress();
+    user3Addr = await user3.getAddress();
+    user4Addr = await user4.getAddress();
 
     // deploy zkJump
     ZkJumpFactory = await ethers.getContractFactory('ZkJump');
-    zkJumpContract = (await upgrades.deployProxy(ZkJumpFactory, [witness.address], {
+    zkJumpContract = (await upgrades.deployProxy(ZkJumpFactory, [witnessAddr], {
       kind: 'uups',
       initializer: 'initialize',
       unsafeAllow: ['constructor'],
@@ -147,39 +157,39 @@ describe('ZkJump', function () {
     mockTokenAddr = await mockTokenContract.getAddress();
 
     // mint mockToken
-    await mockTokenContract.mint(owner.address, parseEther('1000000'));
-    await mockTokenContract.mint(user1.address, parseEther('10000'));
-    await mockTokenContract.mint(user2.address, parseEther('10000'));
+    await mockTokenContract.mint(ownerAddr, parseEther('1000000'));
+    await mockTokenContract.mint(user1Addr, parseEther('10000'));
+    await mockTokenContract.mint(user2Addr, parseEther('10000'));
   });
 
   describe('Role Test', function () {
     it('should get default witness', async function () {
-      expect(await zkJumpContract.hasRole(WITNESS_ROLE_HASH, witness.address)).to.equal(true);
+      expect(await zkJumpContract.hasRole(WITNESS_ROLE_HASH, witnessAddr)).to.equal(true);
     });
 
     it('should set executor', async function () {
-      await zkJumpContract.grantRole(EXECUTOR_ROLE_HASH, executor.address);
-      expect(await zkJumpContract.hasRole(EXECUTOR_ROLE_HASH, executor.address)).to.equal(true);
+      await zkJumpContract.grantRole(EXECUTOR_ROLE_HASH, executorAddr);
+      expect(await zkJumpContract.hasRole(EXECUTOR_ROLE_HASH, executorAddr)).to.equal(true);
     });
 
     it('should set emergencier', async function () {
-      await zkJumpContract.grantRole(EMERGENCIER_ROLE_HASH, emergencier.address);
-      expect(await zkJumpContract.hasRole(EMERGENCIER_ROLE_HASH, emergencier.address)).to.equal(true);
+      await zkJumpContract.grantRole(EMERGENCIER_ROLE_HASH, emergencierAddr);
+      expect(await zkJumpContract.hasRole(EMERGENCIER_ROLE_HASH, emergencierAddr)).to.equal(true);
     });
 
     it('should revoke executor', async function () {
-      await zkJumpContract.revokeRole(EXECUTOR_ROLE_HASH, executor.address);
-      expect(await zkJumpContract.hasRole(EXECUTOR_ROLE_HASH, executor.address)).to.equal(false);
+      await zkJumpContract.revokeRole(EXECUTOR_ROLE_HASH, executorAddr);
+      expect(await zkJumpContract.hasRole(EXECUTOR_ROLE_HASH, executorAddr)).to.equal(false);
     });
 
     it('should revoke emergencier', async function () {
-      await zkJumpContract.revokeRole(EMERGENCIER_ROLE_HASH, emergencier.address);
-      expect(await zkJumpContract.hasRole(EMERGENCIER_ROLE_HASH, emergencier.address)).to.equal(false);
+      await zkJumpContract.revokeRole(EMERGENCIER_ROLE_HASH, emergencierAddr);
+      expect(await zkJumpContract.hasRole(EMERGENCIER_ROLE_HASH, emergencierAddr)).to.equal(false);
     });
 
     it('should set default admin', async function () {
-      await zkJumpContract.grantRole(DEFAULT_AADMIN_ROLE_HASH, user1.address);
-      expect(await zkJumpContract.hasRole(DEFAULT_AADMIN_ROLE_HASH, user1.address)).to.equal(true);
+      await zkJumpContract.grantRole(DEFAULT_AADMIN_ROLE_HASH, user1Addr);
+      expect(await zkJumpContract.hasRole(DEFAULT_AADMIN_ROLE_HASH, user1Addr)).to.equal(true);
     });
   });
 
@@ -188,14 +198,14 @@ describe('ZkJump', function () {
       await zkJumpContract.setSupportedToken(mockTokenAddr, true);
       await mockTokenContract.connect(user1).approve(zkJumpAddr, parseEther('1000'));
 
-      const userNonce = await zkJumpContract.userBridgeNonce(user1.address);
+      const userNonce = await zkJumpContract.userBridgeNonce(user1Addr);
       console.log('userNonce:', userNonce);
 
       const { expiry, signature } = await getBridgeSignature(
         zkJumpAddr,
         mockTokenAddr,
-        user1.address,
-        user3.address,
+        user1Addr,
+        user3Addr,
         31337,
         31337,
         parseEther('1000'),
@@ -205,21 +215,21 @@ describe('ZkJump', function () {
 
       await zkJumpContract
         .connect(user1)
-        .bridgeERC20(mockTokenAddr, user3.address, parseEther('1000'), 31337, expiry, signature);
+        .bridgeERC20(mockTokenAddr, user3Addr, parseEther('1000'), 31337, expiry, signature);
       expect(await mockTokenContract.balanceOf(zkJumpAddr)).to.equal(parseEther('1000'));
-      expect(await mockTokenContract.balanceOf(user1.address)).to.equal(parseEther('9000'));
+      expect(await mockTokenContract.balanceOf(user1Addr)).to.equal(parseEther('9000'));
     });
 
     it('should release', async function () {
       await mockTokenContract.connect(user2).approve(zkJumpAddr, parseEther('2000'));
 
-      const user1Nonce = await zkJumpContract.userBridgeNonce(user1.address);
-      const user2Nonce = await zkJumpContract.userBridgeNonce(user2.address);
+      const user1Nonce = await zkJumpContract.userBridgeNonce(user1Addr);
+      const user2Nonce = await zkJumpContract.userBridgeNonce(user2Addr);
       const { expiry: expiry2, signature: signature2 } = await getBridgeSignature(
         zkJumpAddr,
         mockTokenAddr,
-        user2.address,
-        user4.address,
+        user2Addr,
+        user4Addr,
         31337,
         31337,
         parseEther('2000'),
@@ -228,17 +238,17 @@ describe('ZkJump', function () {
       );
       await zkJumpContract
         .connect(user2)
-        .bridgeERC20(mockTokenAddr, user4.address, parseEther('2000'), 31337, expiry2, signature2);
+        .bridgeERC20(mockTokenAddr, user4Addr, parseEther('2000'), 31337, expiry2, signature2);
 
       expect(await mockTokenContract.balanceOf(zkJumpAddr)).to.equal(parseEther('3000'));
-      expect(await mockTokenContract.balanceOf(user2.address)).to.equal(parseEther('8000'));
+      expect(await mockTokenContract.balanceOf(user2Addr)).to.equal(parseEther('8000'));
 
-      await zkJumpContract.grantRole(EXECUTOR_ROLE_HASH, executor.address);
+      await zkJumpContract.grantRole(EXECUTOR_ROLE_HASH, executorAddr);
 
       const releaseSignature1 = await getReleaseSignature(
         zkJumpAddr,
         mockTokenAddr,
-        user3.address,
+        user3Addr,
         31337,
         31337,
         parseEther('1000'),
@@ -248,7 +258,7 @@ describe('ZkJump', function () {
       );
       const releaseParam1: ZkJump.ReleaseParamStruct = {
         token: mockTokenAddr,
-        receiver: user3.address,
+        receiver: user3Addr,
         orgChainId: 31337,
         amount: parseEther('1000'),
         nonce: Number(user1Nonce) + 1,
@@ -258,7 +268,7 @@ describe('ZkJump', function () {
       const releaseSignature2 = await getReleaseSignature(
         zkJumpAddr,
         mockTokenAddr,
-        user4.address,
+        user4Addr,
         31337,
         31337,
         parseEther('2000'),
@@ -268,7 +278,7 @@ describe('ZkJump', function () {
       );
       const releaseParam2: ZkJump.ReleaseParamStruct = {
         token: mockTokenAddr,
-        receiver: user4.address,
+        receiver: user4Addr,
         orgChainId: 31337,
         amount: parseEther('2000'),
         nonce: Number(user2Nonce) + 1,
@@ -279,8 +289,8 @@ describe('ZkJump', function () {
       await zkJumpContract.connect(executor).batchReleaseERC20([releaseParam1, releaseParam2]);
 
       expect(await mockTokenContract.balanceOf(zkJumpAddr)).to.equal(0);
-      expect(await mockTokenContract.balanceOf(user3.address)).to.equal(parseEther('1000'));
-      expect(await mockTokenContract.balanceOf(user4.address)).to.equal(parseEther('2000'));
+      expect(await mockTokenContract.balanceOf(user3Addr)).to.equal(parseEther('1000'));
+      expect(await mockTokenContract.balanceOf(user4Addr)).to.equal(parseEther('2000'));
     });
   });
 });
