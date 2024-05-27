@@ -31,7 +31,7 @@ contract ZkJump is
 
     bytes32 public constant BRIDGE_AUTH_TYPE_HASH =
         keccak256(
-            "BridgeAuth(address token,address sender,address receiver,uint256 orgChainId,uint256 dstChainId,uint256 amount,uint256 nonce,uint256 expiry)"
+            "BridgeAuth(address token,address sender,uint256 orgChainId,uint256 dstChainId,uint256 amount,uint256 expiry)"
         );
     bytes32 public constant RELEASE_AUTH_TYPE_HASH =
         keccak256(
@@ -57,19 +57,14 @@ contract ZkJump is
     /// @dev The mapping of the token's balances
     mapping(address token => uint256) public balances;
 
-    /// @dev The mapping of the user's bridge nonce
-    mapping(address user => uint256 nonce) public userBridgeNonce;
-
     event ChangeSupportToken(address indexed token, bool supported);
 
     event Bridge(
         address indexed token,
         address indexed sender,
-        address indexed receiver,
         uint256 amount,
         uint256 orgChainId,
         uint256 dstChainId,
-        uint256 nonce,
         uint256 expiry
     );
 
@@ -122,20 +117,15 @@ contract ZkJump is
 
     function bridgeERC20(
         address _token,
-        address _receiver,
         uint256 _amount,
         uint256 _dstChainId,
         uint256 _expiry,
         bytes calldata _signature
     ) external nonReentrant whenNotPaused {
         require(supportedTokens[_token], "Token not supported");
-        require(_receiver != address(0), "Invalid address");
         require(_amount > 0, "Invalid amount");
         // solhint-disable-next-line avoid-tx-origin
         require(_msgSender() == tx.origin, "Only EOA");
-
-        uint256 nonce = userBridgeNonce[_msgSender()] + 1;
-        userBridgeNonce[_msgSender()] = nonce;
 
         // get original chainId
         uint256 orgChainId;
@@ -143,17 +133,7 @@ contract ZkJump is
             orgChainId := chainid()
         }
 
-        _checkBridgeSignature(
-            _token,
-            _msgSender(),
-            _receiver,
-            orgChainId,
-            _dstChainId,
-            _amount,
-            nonce,
-            _expiry,
-            _signature
-        );
+        _checkBridgeSignature(_token, _msgSender(), orgChainId, _dstChainId, _amount, _expiry, _signature);
 
         unchecked {
             balances[_token] += _amount;
@@ -161,7 +141,7 @@ contract ZkJump is
 
         IERC20(_token).safeTransferFrom(_msgSender(), address(this), _amount);
 
-        emit Bridge(_token, _msgSender(), _receiver, _amount, orgChainId, _dstChainId, nonce, _expiry);
+        emit Bridge(_token, _msgSender(), _amount, orgChainId, _dstChainId, _expiry);
     }
 
     function batchReleaseERC20(
@@ -226,17 +206,15 @@ contract ZkJump is
     function _checkBridgeSignature(
         address token,
         address sender,
-        address receiver,
         uint256 orgChainId,
         uint256 dstChainId,
         uint256 amount,
-        uint256 nonce,
         uint256 expiry,
         bytes calldata signature
     ) internal {
         require(block.timestamp <= expiry, "Signature has expired");
         bytes32 signatureHash = keccak256(
-            abi.encode(BRIDGE_AUTH_TYPE_HASH, token, sender, receiver, orgChainId, dstChainId, amount, nonce, expiry)
+            abi.encode(BRIDGE_AUTH_TYPE_HASH, token, sender, orgChainId, dstChainId, amount, expiry)
         );
 
         _checkSignature(signatureHash, signature);

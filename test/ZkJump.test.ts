@@ -8,11 +8,9 @@ async function getBridgeSignature(
   contractAddr: string,
   token: string,
   sender: string,
-  receiver: string,
   orgChainId: number,
   dstChainId: number,
   amount: bigint,
-  nonce: number,
   signer: Signer,
 ) {
   const domain = {
@@ -25,11 +23,9 @@ async function getBridgeSignature(
     BridgeAuth: [
       { name: 'token', type: 'address' },
       { name: 'sender', type: 'address' },
-      { name: 'receiver', type: 'address' },
       { name: 'orgChainId', type: 'uint256' },
       { name: 'dstChainId', type: 'uint256' },
       { name: 'amount', type: 'uint256' },
-      { name: 'nonce', type: 'uint256' },
       { name: 'expiry', type: 'uint256' },
     ],
   };
@@ -38,11 +34,9 @@ async function getBridgeSignature(
   const message = {
     token: token,
     sender: sender,
-    receiver: receiver,
     orgChainId: orgChainId,
     dstChainId: dstChainId,
     amount: amount,
-    nonce: nonce,
     expiry: expiry,
   };
 
@@ -198,24 +192,17 @@ describe('ZkJump', function () {
       await zkJumpContract.setSupportedToken(mockTokenAddr, true);
       await mockTokenContract.connect(user1).approve(zkJumpAddr, parseEther('1000'));
 
-      const userNonce = await zkJumpContract.userBridgeNonce(user1Addr);
-      console.log('userNonce:', userNonce);
-
       const { expiry, signature } = await getBridgeSignature(
         zkJumpAddr,
         mockTokenAddr,
         user1Addr,
-        user3Addr,
         31337,
         31337,
         parseEther('1000'),
-        Number(userNonce) + 1,
         witness,
       );
 
-      await zkJumpContract
-        .connect(user1)
-        .bridgeERC20(mockTokenAddr, user3Addr, parseEther('1000'), 31337, expiry, signature);
+      await zkJumpContract.connect(user1).bridgeERC20(mockTokenAddr, parseEther('1000'), 31337, expiry, signature);
       expect(await mockTokenContract.balanceOf(zkJumpAddr)).to.equal(parseEther('1000'));
       expect(await mockTokenContract.balanceOf(user1Addr)).to.equal(parseEther('9000'));
     });
@@ -223,22 +210,20 @@ describe('ZkJump', function () {
     it('should release', async function () {
       await mockTokenContract.connect(user2).approve(zkJumpAddr, parseEther('2000'));
 
-      const user1Nonce = await zkJumpContract.userBridgeNonce(user1Addr);
-      const user2Nonce = await zkJumpContract.userBridgeNonce(user2Addr);
       const { expiry: expiry2, signature: signature2 } = await getBridgeSignature(
         zkJumpAddr,
         mockTokenAddr,
         user2Addr,
-        user4Addr,
         31337,
         31337,
         parseEther('2000'),
-        Number(user2Nonce) + 1,
         witness,
       );
-      await zkJumpContract
-        .connect(user2)
-        .bridgeERC20(mockTokenAddr, user4Addr, parseEther('2000'), 31337, expiry2, signature2);
+      await zkJumpContract.connect(user2).bridgeERC20(mockTokenAddr, parseEther('2000'), 31337, expiry2, signature2);
+
+      await expect(
+        zkJumpContract.connect(user2).bridgeERC20(mockTokenAddr, parseEther('2000'), 31337, expiry2, signature2),
+      ).to.be.revertedWith('Used Signature');
 
       expect(await mockTokenContract.balanceOf(zkJumpAddr)).to.equal(parseEther('3000'));
       expect(await mockTokenContract.balanceOf(user2Addr)).to.equal(parseEther('8000'));
@@ -252,7 +237,7 @@ describe('ZkJump', function () {
         31337,
         31337,
         parseEther('1000'),
-        Number(user1Nonce) + 1,
+        1,
         'order1',
         witness,
       );
@@ -261,7 +246,7 @@ describe('ZkJump', function () {
         receiver: user3Addr,
         orgChainId: 31337,
         amount: parseEther('1000'),
-        nonce: Number(user1Nonce) + 1,
+        nonce: 1,
         bridgeTxHash: encodeBytes32String('order1'),
         signature: releaseSignature1,
       };
@@ -272,7 +257,7 @@ describe('ZkJump', function () {
         31337,
         31337,
         parseEther('2000'),
-        Number(user2Nonce) + 1,
+        2,
         'order2',
         witness,
       );
@@ -281,7 +266,7 @@ describe('ZkJump', function () {
         receiver: user4Addr,
         orgChainId: 31337,
         amount: parseEther('2000'),
-        nonce: Number(user2Nonce) + 1,
+        nonce: 2,
         bridgeTxHash: encodeBytes32String('order2'),
         signature: releaseSignature2,
       };
