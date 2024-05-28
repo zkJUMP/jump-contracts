@@ -16,7 +16,7 @@ async function getBridgeSignature(
   const domain = {
     name: 'ZKJUMP',
     version: '1.0',
-    chainId: 31337,
+    chainId: orgChainId,
     verifyingContract: contractAddr,
   };
   const types = {
@@ -61,7 +61,7 @@ async function getReleaseSignature(
   const domain = {
     name: 'ZKJUMP',
     version: '1.0',
-    chainId: 31337,
+    chainId: orgChainId,
     verifyingContract: contractAddr,
   };
   const types = {
