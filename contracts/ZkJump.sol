@@ -78,7 +78,7 @@ contract ZkJump is
         bytes32 bridgeTxHash
     );
 
-    event Rebalance(address indexed token, address receiver, uint256 amount);
+    event Rebalance(address indexed token, address receiver, uint256 amount, bool isDeposit);
 
     /**
      * @dev This empty reserved space is put in place to allow future versions to add new
@@ -190,17 +190,27 @@ contract ZkJump is
         emit Release(_token, _receiver, _orgChainId, chainId, _amount, _nonce, bridgeTxHash);
     }
 
-    function rebalanceERC20(address _token, uint256 _amount) external onlyRole(EMERGENCIER_ROLE) {
+    function rebalanceERC20(address _token, uint256 _amount, bool isDeposit) external onlyRole(EMERGENCIER_ROLE) {
         require(supportedTokens[_token], "Token not supported");
-        require(balances[_token] >= _amount, "Insufficient balance");
+        require(_amount > 0, "Invalid amount");
 
-        unchecked {
-            balances[_token] -= _amount;
+        if (isDeposit) {
+            unchecked {
+                balances[_token] += _amount;
+            }
+
+            IERC20(_token).safeTransferFrom(_msgSender(), address(this), _amount);
+            emit Rebalance(_token, address(this), _amount, isDeposit);
+        } else {
+            require(balances[_token] >= _amount, "Insufficient balance");
+
+            unchecked {
+                balances[_token] -= _amount;
+            }
+
+            IERC20(_token).safeTransfer(_msgSender(), _amount);
+            emit Rebalance(_token, _msgSender(), _amount, isDeposit);
         }
-
-        IERC20(_token).safeTransfer(_msgSender(), _amount);
-
-        emit Rebalance(_token, _msgSender(), _amount);
     }
 
     function _checkBridgeSignature(
