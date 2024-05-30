@@ -8,8 +8,7 @@ import {
   DEPLOY_ZKJUMP_LOG_PREFIX,
   DEPLOY_LOG_ZKJUMP_PROXY,
   DEPLOY_LOG_ZKJUMP_TARGET,
-  DEPLOY_LOG_ZKJUMP_TARGET_VERIFIED,
-  DEPLOY_LOG_ZKJUMP_PROXY_VERIFIED,
+  DEPLOY_LOG_ZKJUMP_VERIFIED,
   DEPLOY_LOG_ZKJUMP_WITNESS,
 } from './deploy_log_name';
 import { task, types } from 'hardhat/config';
@@ -67,17 +66,10 @@ task('deployZkjump', 'Deploy zkJump')
     }
     console.log('zkjump target', zkjumpTargetAddr);
 
-    // verify target contract
-    if (!(DEPLOY_LOG_ZKJUMP_TARGET_VERIFIED in dLog) && !skipVerify) {
-      await verifyContractCode(hardhat, zkjumpTargetAddr, []);
-      dLog[DEPLOY_LOG_ZKJUMP_TARGET_VERIFIED] = true;
-      fs.writeFileSync(deployLogPath, JSON.stringify(dLog, null, 2));
-    }
-
     // verify proxy contract
-    if (!(DEPLOY_LOG_ZKJUMP_PROXY_VERIFIED in dLog) && !skipVerify) {
-      await verifyContractCode(hardhat, zkjumpAddr, []);
-      dLog[DEPLOY_LOG_ZKJUMP_PROXY_VERIFIED] = true;
+    if (!(DEPLOY_LOG_ZKJUMP_VERIFIED in dLog) && !skipVerify) {
+      await verifyContractCode(hardhat, zkjumpAddr, [], getZkJumpContractName());
+      dLog[DEPLOY_LOG_ZKJUMP_VERIFIED] = true;
       fs.writeFileSync(deployLogPath, JSON.stringify(dLog, null, 2));
     }
   });
@@ -120,8 +112,8 @@ task('upgradeZkjump', 'Upgrade zkjump')
 
     // verify target contract
     if (!skipVerify) {
-      await verifyContractCode(hardhat, newContractTargetAddr, []);
-      dLog[DEPLOY_LOG_ZKJUMP_TARGET_VERIFIED] = true;
+      await verifyContractCode(hardhat, newContractTargetAddr, [], getZkJumpContractName());
+      dLog[DEPLOY_LOG_ZKJUMP_VERIFIED] = true;
       fs.writeFileSync(deployLogPath, JSON.stringify(dLog, null, 2));
     }
   });
@@ -154,8 +146,8 @@ task('deployZkjumpTarget', 'Deploy zkjump target')
 
     // verify target contract
     if (!skipVerify) {
-      await verifyContractCode(hardhat, zkjumpTargetAddr, []);
-      dLog[DEPLOY_LOG_ZKJUMP_TARGET_VERIFIED] = true;
+      await verifyContractCode(hardhat, zkjumpTargetAddr, [], getZkJumpContractName());
+      dLog[DEPLOY_LOG_ZKJUMP_VERIFIED] = true;
       fs.writeFileSync(deployLogPath, JSON.stringify(dLog, null, 2));
     }
   });

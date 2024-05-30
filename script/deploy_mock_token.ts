@@ -8,8 +8,7 @@ import {
   DEPLOY_MOCK_TOKEN_LOG_PREFIX,
   DEPLOY_LOG_MOCK_TOKEN_PROXY,
   DEPLOY_LOG_MOCK_TOKEN_TARGET,
-  DEPLOY_LOG_MOCK_TOKEN_TARGET_VERIFIED,
-  DEPLOY_LOG_MOCK_TOKEN_PROXY_VERIFIED,
+  DEPLOY_LOG_MOCK_TOKEN_VERIFIED,
 } from './deploy_log_name';
 import { task, types } from 'hardhat/config';
 
@@ -60,17 +59,10 @@ task('deployMockToken', 'Deploy mock zklink token')
     }
     console.log('mockToken target', mockTokenTargetAddr);
 
-    // verify target contract
-    if (!(DEPLOY_LOG_MOCK_TOKEN_TARGET_VERIFIED in dLog) && !skipVerify) {
-      await verifyContractCode(hardhat, mockTokenTargetAddr, []);
-      dLog[DEPLOY_LOG_MOCK_TOKEN_TARGET_VERIFIED] = true;
-      fs.writeFileSync(deployLogPath, JSON.stringify(dLog, null, 2));
-    }
-
     // verify proxy contract
-    if (!(DEPLOY_LOG_MOCK_TOKEN_PROXY_VERIFIED in dLog) && !skipVerify) {
-      await verifyContractCode(hardhat, mockTokenAddr, []);
-      dLog[DEPLOY_LOG_MOCK_TOKEN_PROXY_VERIFIED] = true;
+    if (!(DEPLOY_LOG_MOCK_TOKEN_VERIFIED in dLog) && !skipVerify) {
+      await verifyContractCode(hardhat, mockTokenAddr, [], getMockTokenContractName());
+      dLog[DEPLOY_LOG_MOCK_TOKEN_VERIFIED] = true;
       fs.writeFileSync(deployLogPath, JSON.stringify(dLog, null, 2));
     }
   });
@@ -113,8 +105,8 @@ task('upgradeMockToken', 'Upgrade mockToken')
 
     // verify target contract
     if (!skipVerify) {
-      await verifyContractCode(hardhat, newContractTargetAddr, []);
-      dLog[DEPLOY_LOG_MOCK_TOKEN_TARGET_VERIFIED] = true;
+      await verifyContractCode(hardhat, newContractTargetAddr, [], getMockTokenContractName());
+      dLog[DEPLOY_LOG_MOCK_TOKEN_VERIFIED] = true;
       fs.writeFileSync(deployLogPath, JSON.stringify(dLog, null, 2));
     }
   });
@@ -147,8 +139,8 @@ task('deployMockTokenTarget', 'Deploy mockToken target')
 
     // verify target contract
     if (!skipVerify) {
-      await verifyContractCode(hardhat, mockTokenTargetAddr, []);
-      dLog[DEPLOY_LOG_MOCK_TOKEN_TARGET_VERIFIED] = true;
+      await verifyContractCode(hardhat, mockTokenTargetAddr, [], getMockTokenContractName());
+      dLog[DEPLOY_LOG_MOCK_TOKEN_VERIFIED] = true;
       fs.writeFileSync(deployLogPath, JSON.stringify(dLog, null, 2));
     }
   });
