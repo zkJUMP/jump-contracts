@@ -13,7 +13,6 @@
     "eslint": "^8.30.0",
     "eslint-config-prettier": "^9.0.0",
     "hardhat": "^2.19.3",
-    "hardhat-gas-reporter": "^2.2.0",
     "prettier": "^3.0.0",
     "prettier-plugin-solidity": "^1.1.0",
     "solhint": "^4.5.2",

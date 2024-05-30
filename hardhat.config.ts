@@ -7,7 +7,6 @@ import '@matterlabs/hardhat-zksync-verify';
 import '@matterlabs/hardhat-zksync-upgradable';
 import * as dotenv from 'dotenv';
 import { NetworksUserConfig, NetworkUserConfig } from 'hardhat/src/types/config';
-import 'hardhat-gas-reporter';
 
 import './script/deploy_zkjump';
 import './script/deploy_mock_token';
@@ -21,9 +20,6 @@ const config: HardhatUserConfig = {
   typechain: {
     outDir: 'typechain',
     target: 'ethers-v6',
-  },
-  gasReporter: {
-    enabled: true,
   },
   solidity: {
     compilers: [
