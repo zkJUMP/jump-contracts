@@ -39,3 +39,7 @@ Authorization for special roles:
 > `EXECUTOR_ROLE`: 0xd8aa0f3194971a2a116679f7c2090f6939c8d4e01a2a8d7e41d55e5351469e63
 > `EMERGENCIER_ROLE`: 0xdb208a64691d3c21ac31bc89c1a7cb7fc26fffcaf229cccfdd242a36a0f87fba
 > `WITNESS_ROLE`: 0x01e3814859e1fb52a3619fc87e5bf0e88a404a49d305aef38ab09dc39741b1a7
+
+## Upgrade
+
+`NET=zklinkSepolia npx hardhat upgradeZkjump`
