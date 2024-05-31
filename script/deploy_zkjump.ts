@@ -151,3 +151,31 @@ task('deployZkjumpTarget', 'Deploy zkjump target')
       fs.writeFileSync(deployLogPath, JSON.stringify(dLog, null, 2));
     }
   });
+
+task('grantRole', 'Grant role to zkjump')
+  .addParam('role', 'The role hash', undefined, types.string, false)
+  .addParam('account', 'The account address', undefined, types.string, false)
+  .setAction(async (taskArgs, hardhat) => {
+    const role = taskArgs.role;
+    const account = taskArgs.account;
+    console.log('role', role);
+    console.log('account', account);
+
+    const contractDeployer = new ChainContractDeployer(hardhat);
+    await contractDeployer.init();
+
+    const { deployLog } = createOrGetDeployLog(DEPLOY_ZKJUMP_LOG_PREFIX, hardhat.network.name);
+    const dLog = deployLog as any;
+    const contractAddr = dLog[DEPLOY_LOG_ZKJUMP_PROXY];
+    if (contractAddr === undefined) {
+      console.log('zkjump address not exist');
+      return;
+    }
+    console.log('zkjump', contractAddr);
+
+    console.log('grant role...');
+
+    const contract = await hardhat.ethers.getContractAt(getZkJumpContractName(), contractAddr);
+    const tx = await contract.grantRole(role, account);
+    console.log('tx hash', tx.hash);
+  });
