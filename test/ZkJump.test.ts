@@ -189,7 +189,6 @@ describe('ZkJump', function () {
 
   describe('Bridge Test', function () {
     it('should bridge', async function () {
-      await zkJumpContract.setSupportedToken(mockTokenAddr, true);
       await mockTokenContract.connect(user1).approve(zkJumpAddr, parseEther('1000'));
 
       const { expiry, signature } = await getBridgeSignature(

@@ -109,12 +109,6 @@ contract ZkJump is
         // can only called by owner
     }
 
-    function setSupportedToken(address _token, bool _supported) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        supportedTokens[_token] = _supported;
-
-        emit ChangeSupportToken(_token, _supported);
-    }
-
     function bridgeERC20(
         address _token,
         uint256 _amount,
@@ -122,7 +116,6 @@ contract ZkJump is
         uint256 _expiry,
         bytes calldata _signature
     ) external nonReentrant whenNotPaused {
-        require(supportedTokens[_token], "Token not supported");
         require(_amount > 0, "Invalid amount");
         // solhint-disable-next-line avoid-tx-origin
         require(_msgSender() == tx.origin, "Only EOA");
@@ -135,9 +128,7 @@ contract ZkJump is
 
         _checkBridgeSignature(_token, _msgSender(), orgChainId, _dstChainId, _amount, _expiry, _signature);
 
-        unchecked {
-            balances[_token] += _amount;
-        }
+        balances[_token] += _amount;
 
         IERC20(_token).safeTransferFrom(_msgSender(), address(this), _amount);
 
@@ -169,7 +160,6 @@ contract ZkJump is
         bytes32 bridgeTxHash,
         bytes calldata _signature
     ) internal {
-        require(supportedTokens[_token], "Token not supported");
         require(_receiver != address(0), "Invalid address");
         require(_amount > 0, "Invalid amount");
         require(balances[_token] >= _amount, "Insufficient balance");
@@ -181,9 +171,7 @@ contract ZkJump is
 
         _checkReleaseSignature(_token, _receiver, _orgChainId, chainId, _amount, _nonce, bridgeTxHash, _signature);
 
-        unchecked {
-            balances[_token] -= _amount;
-        }
+        balances[_token] -= _amount;
 
         IERC20(_token).safeTransfer(_receiver, _amount);
 
@@ -191,22 +179,17 @@ contract ZkJump is
     }
 
     function rebalanceERC20(address _token, uint256 _amount, bool isDeposit) external onlyRole(EMERGENCIER_ROLE) {
-        require(supportedTokens[_token], "Token not supported");
         require(_amount > 0, "Invalid amount");
 
         if (isDeposit) {
-            unchecked {
-                balances[_token] += _amount;
-            }
+            balances[_token] += _amount;
 
             IERC20(_token).safeTransferFrom(_msgSender(), address(this), _amount);
             emit Rebalance(_token, address(this), _amount, isDeposit);
         } else {
             require(balances[_token] >= _amount, "Insufficient balance");
 
-            unchecked {
-                balances[_token] -= _amount;
-            }
+            balances[_token] -= _amount;
 
             IERC20(_token).safeTransfer(_msgSender(), _amount);
             emit Rebalance(_token, _msgSender(), _amount, isDeposit);
