@@ -12,6 +12,7 @@ import {
   DEPLOY_LOG_ZKJUMP_WITNESS,
 } from './deploy_log_name';
 import { task, types } from 'hardhat/config';
+import { parseEther } from 'ethers';
 
 function getZkJumpContractName() {
   return 'ZkJump';
@@ -178,4 +179,49 @@ task('grantRole', 'Grant role to zkjump')
     const contract = await hardhat.ethers.getContractAt(getZkJumpContractName(), contractAddr);
     const tx = await contract.grantRole(role, account);
     console.log('tx hash', tx.hash);
+  });
+
+task('rebalance', 'Rebalance zkjump')
+  .addParam('token', 'The token address', undefined, types.string, false)
+  .addParam('amount', 'The amount to rebalance (ether)', undefined, types.string, false)
+  .addParam('isDeposit', 'Is deposit', true, types.boolean, true)
+  .addParam('privateKey', 'The private key of EMERGENCIER_ROLE', undefined, types.string, false)
+  .setAction(async (taskArgs, hardhat) => {
+    const token = taskArgs.token;
+    const amount = taskArgs.amount;
+    const isDeposit = taskArgs.isDeposit;
+    const privateKey = taskArgs.privateKey;
+    console.log('token', token);
+    console.log('amount', parseEther(amount).toString());
+    console.log('isDeposit', isDeposit);
+
+    const signer = new hardhat.ethers.Wallet(privateKey, hardhat.ethers.provider);
+
+    const contractDeployer = new ChainContractDeployer(hardhat);
+    await contractDeployer.init();
+
+    const { deployLog } = createOrGetDeployLog(DEPLOY_ZKJUMP_LOG_PREFIX, hardhat.network.name);
+    const dLog = deployLog as any;
+    const contractAddr = dLog[DEPLOY_LOG_ZKJUMP_PROXY];
+    if (contractAddr === undefined) {
+      console.log('zkjump address not exist');
+      return;
+    }
+    console.log('zkjump', contractAddr);
+
+    const tokenContract = await hardhat.ethers.getContractAt('ZkLinkToken', token, signer);
+    const tokenName = await tokenContract.name();
+    const jumpContract = await hardhat.ethers.getContractAt(getZkJumpContractName(), contractAddr, signer);
+
+    if (isDeposit) {
+      const approveTx = await tokenContract.approve(contractAddr, parseEther(amount));
+      await approveTx.wait();
+      console.log(`Approval of ${amount} ${tokenName} to ${contractAddr} is successful, tx: ${approveTx.hash}`);
+    }
+
+    console.log('rebalance...');
+
+    const rebalanceTx = await jumpContract.rebalanceERC20(token, parseEther(amount), isDeposit);
+    await rebalanceTx.wait();
+    console.log('Rebalance tx hash', rebalanceTx.hash);
   });
