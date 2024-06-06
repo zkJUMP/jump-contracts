@@ -51,9 +51,10 @@ Authorization for special roles:
 
 ## Rebalance
 
-`NET=zklinkSepolia npx hardhat rebalance --token "token address" --amount 1000000 --is-deposit false --private-key "your private key"`
+`NET=zklinkSepolia npx hardhat rebalance --token "token address" --decimals 18 --amount 1000000 --is-deposit false --private-key "your private key"`
 
 - `--token`: Token address
+- `--decimals`: Token decimals
 - `--amount`: The amount to rebalance (ether)
 - `--is-deposit`: True: Deposit, False: Withdraw
 - `--private-key`: The private key of EMERGENCIER_ROLE
