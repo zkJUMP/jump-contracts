@@ -97,15 +97,15 @@ const config: HardhatUserConfig = {
       zksync: false,
     },
     optimism: {
-      url: 'https://mainnet.optimism.io',
+      url: 'https://optimism.meowrpc.com',
       zksync: false,
     },
     sepolia: {
-      url: `https://sepolia.infura.io/v3/${process.env.INFURA_API_KEY}`,
+      url: `https://eth-sepolia.api.onfinality.io/public`,
       zksync: false,
     },
     mainnet: {
-      url: `https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`,
+      url: `https://eth.llamarpc.com`,
       zksync: false,
     },
     zksyncSepolia: {
@@ -118,6 +118,16 @@ const config: HardhatUserConfig = {
       url: 'https://mainnet.era.zksync.io',
       ethNetwork: 'mainnet',
       zksync: true,
+      verifyURL: 'https://zksync2-mainnet-explorer.zksync.io/contract_verification',
+    },
+    scrollSepolia: {
+      url: 'https://sepolia-rpc.scroll.io/',
+      zksync: false,
+      verifyURL: 'https://explorer.sepolia.era.zksync.dev/contract_verification',
+    },
+    scroll: {
+      url: 'https://rpc.scroll.io/',
+      zksync: false,
       verifyURL: 'https://zksync2-mainnet-explorer.zksync.io/contract_verification',
     },
   },
@@ -137,6 +147,8 @@ const config: HardhatUserConfig = {
       optimism: process.env.OPTIMISMSCAN_API_KEY ?? '',
       sepolia: process.env.ETHERSCAN_API_KEY ?? '',
       mainnet: process.env.ETHERSCAN_API_KEY ?? '',
+      scrollSepolia: process.env.SCROLL_SCAN_API_KEY ?? '',
+      scroll: process.env.SCROLL_SCAN_API_KEY ?? '',
     },
     customChains: [
       {
@@ -201,6 +213,22 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: 'https://api-optimistic.etherscan.io/api',
           browserURL: 'https://explorer.optimism.io',
+        },
+      },
+      {
+        network: 'scrollSepolia',
+        chainId: 534351,
+        urls: {
+          apiURL: 'https://api-sepolia.scrollscan.com/api',
+          browserURL: 'https://sepolia.scrollscan.com',
+        },
+      },
+      {
+        network: 'scroll',
+        chainId: 534352,
+        urls: {
+          apiURL: 'https://api.scrollscan.com/api',
+          browserURL: 'https://scrollscan.com/',
         },
       },
     ],
