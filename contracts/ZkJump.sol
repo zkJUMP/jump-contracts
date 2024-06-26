@@ -197,6 +197,14 @@ contract ZkJump is
         }
     }
 
+    function pause() external onlyRole(EMERGENCIER_ROLE) {
+        _pause();
+    }
+
+    function unpause() external onlyRole(EMERGENCIER_ROLE) {
+        _unpause();
+    }
+
     function _checkBridgeSignature(
         address token,
         address sender,
