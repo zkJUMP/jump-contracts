@@ -102,6 +102,7 @@ contract ZkJump is
         __EIP712_init_unchained("ZKJUMP", "1.0");
 
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
+        require(_defaultWitness != address(0), "Invalid address");
         _setupRole(WITNESS_ROLE, _defaultWitness);
     }
 
