@@ -59,6 +59,86 @@ Authorization for special roles:
 - `--is-deposit`: True: Deposit, False: Withdraw
 - `--private-key`: The private key of EMERGENCIER_ROLE
 
+### ABI
+``` json
+{
+    "inputs": [
+    {
+        "internalType": "address",
+        "name": "_token",
+        "type": "address"
+    },
+    {
+        "internalType": "uint256",
+        "name": "_amount",
+        "type": "uint256"
+    },
+    {
+        "internalType": "bool",
+        "name": "isDeposit",
+        "type": "bool"
+    }
+    ],
+    "name": "rebalanceERC20",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+}
+```
+
+### Deposit
+1. **approve**
+
+    Approve ERC20 token to ZKJump contract
+
+    **ABI**
+    ```json
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "spender",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "approve",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+    ```
+
+    **Input**
+    - `spender`: ZKJump contract address
+    - `amount`: Approve amount(Decimal require)
+
+2. **rebalanceERC20**
+
+    **Input**
+    - `_token`: ERC20 token address
+    - `_amount`: Deposit amount(Decimal require)
+    - `rebalanceERC20`: True
+
+### Withdraw
+1. **rebalanceERC20**
+
+    **Input**
+    - `_token`: ERC20 token address
+    - `_amount`: Deposit amount(Decimal require)
+    - `rebalanceERC20`: False
+
+
 ## Upgrade
 
 `NET=zklinkSepolia npx hardhat upgradeZkjump`
